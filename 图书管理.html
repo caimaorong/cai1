@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="bootstrap.min.css" />
+    <script src="jquery.js"> </script>
+</head>
+<body style="padding: 20px;">
+
+ 
+ <div class="panel panel-primary">
+       <div class="panel-heading">
+             <h3 class="panel-title">添加图书</h3>
+       </div>
+       <div class="panel-body form-inline" >
+           
+           <div class="input-group">
+               <div class="input-group-addon">书名：</div>
+               <input type="text" class="bookn" id="exampleInputAmount" placeholder="请输入书名">
+           </div>
+           <div class="input-group">
+            <div class="input-group-addon">作者：</div>
+            <input type="text" class="booka" id="exampleInputAmount" placeholder="请输入作者">
+        </div>
+        <div class="input-group">
+            <div class="input-group-addon">出版社：</div>
+            <input type="text" class="bookp" id="exampleInputAmount" placeholder="请输入出版社">
+        </div>
+        <button id="btnadd" class="btn btn-primary">确定</button>
+       </div>
+ </div>
+ 
+ <table class="table table-bordered table-hover">
+     <thead>
+         <tr>
+             <th>id</th>
+             <th>书名</th>
+             <th>作者</th>
+             <th>出版社</th>
+             <th>操作</th>
+         </tr>
+     </thead>
+     <tbody id="app">
+         <tr>
+             <td></td>
+         </tr>
+     </tbody>
+ </table>
+ 
+  <script>
+      $(function()
+      {
+          function getbooklist()
+          {
+              $.get("http://www.liulongbin.top:3006/api/getbooks",function(msg)
+              {
+                  if(msg.status!=200)
+                  return alert("获取失败！")
+                  var rows=[ ];
+                  $.each(msg.data,function(i,item)
+                  {
+                    rows.push('<tr><td>'+item.id+'</td><td>'+item.bookname+'</td><td>'+item.author+'</td><td>'+item.publisher+'</td><td><a href="javascript:;" class="ta" data-id="'+item.id+'">删除</a></td></tr>')
+                  })
+
+                 $("#app").empty().append(rows.join(""))  
+              })
+          } 
+          getbooklist();
+          $("tbody").on("click",".ta",function(res)
+          {
+              var id;
+              id=$(this).attr("data-id")
+              $.get("http://www.liulongbin.top:3006/api/delbook",{id:id},function(res)
+              {
+                  if(res.status!==200)
+                  return alert("删除失败！");
+                  getbooklist();
+              })
+          })
+          $("#btnadd").on("click",function()
+          {
+              var bname=$(".bookn").val().trim();
+              var bauthor=$(".booka").val().trim();
+              var bpublisher=$(".bookp").val().trim();           
+              if(bname.length<=0||bauthor.length<=0||bpublisher.length<=0)
+              {return alert("请填写完整的图书信息");}
+              $.post("http://www.liulongbin.top:3006/api/addbook",{bookname:bname,author:bauthor,publisher:bpublisher},function(msg){
+                  if(msg.status!==201)
+                  return alert("图书插入失败！")
+                  getbooklist();
+                  $(".bookn").val("")
+                  $(".booka").val("")
+                  $(".bookp").val("")
+              })
+          })
+      })
+     
+  </script>  
+   
+</body>
+</html>
